@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+	<script>
+		mermaid.initialize({ startOnLoad: true });
+	</script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .erd-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .divider {
+            height: 3px;
+            background: linear-gradient(to right, #4CAF50, #2196F3);
+            margin: 40px 0;
+            border-radius: 2px;
+        }
+        .table-section {
+            margin-bottom: 50px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .table-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin: 0;
+            flex-grow: 1;
+        }
+        .tag-container {
+            margin: 10px 0;
+        }
+        .tag {
+            background: #e8f0fe;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+            font-size: 14px;
+            color: #1a73e8;
+        }
+        .metadata-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .metadata-table th,
+        .metadata-table td {
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            text-align: left;
+        }
+        .metadata-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .use-case {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .use-case h4 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .query-button {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .query-button:hover {
+            background: #45a049;
+        }
+        .description {
+            color: #666;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- ERD 섹션 -->
+    <section class="erd-section">
+        <h2>데이터베이스 구조 (ERD)</h2>
+        <div class="mermaid">
+erDiagram
+    account_info {
+        varchar account_code PK
+        varchar account_name
+        text account_description
+    }
+    stock_info {
+        varchar stock_code PK
+        varchar stock_name
+        date listing_date
+        date delisting_date
+    }
+    financial_statement {
+        varchar stock_code FK
+        varchar account_code FK
+        decimal account_value
+        varchar quarter
+        timestamp release_dt
+    }
+    stock_price {
+        varchar stock_code FK
+        decimal open_price
+        decimal high_price
+        decimal low_price
+        decimal close_price
+        bigint volume
+        date trd_dt
+    }
+    financial_statement ||--o{ account_info : "account_code"
+    financial_statement ||--o{ stock_info : "stock_code"
+    stock_price ||--o{ stock_info : "stock_code"
+        </div>
+    </section>
+    
+    <div class="divider"></div>
+
+    <!-- 계정 정보 테이블 섹션 -->
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="table-title">재무제표 계정 설명 테이블 (account_info)</h2>
+        </div>
+        
+        <div class="tag-container">
+            <span class="tag">재무제표</span>
+            <span class="tag">메타데이터</span>
+            <span class="tag">계정정보</span>
+        </div>
+
+        <p class="description">재무제표의 각 계정과목에 대한 기준 정보를 관리하는 마스터 테이블</p>
+
+        <table class="metadata-table">
+            <tr>
+                <th>컬럼명</th>
+                <th>설명</th>
+                <th>데이터타입</th>
+                <th>제약조건</th>
+                <th>활용 태그</th>
+            </tr>
+            <tr>
+                <td>account_code</td>
+                <td>계정과목 코드</td>
+                <td>VARCHAR(20)</td>
+                <td>Primary Key</td>
+                <td>계정식별, 분류</td>
+            </tr>
+            <tr>
+                <td>account_name</td>
+                <td>계정과목명</td>
+                <td>VARCHAR(100)</td>
+                <td>NOT NULL</td>
+                <td>계정명, 검색</td>
+            </tr>
+            <tr>
+                <td>account_description</td>
+                <td>계정과목 설명</td>
+                <td>TEXT</td>
+                <td></td>
+                <td>상세설명, 도움말</td>
+            </tr>
+        </table>
+
+        <div class="use-case">
+            <h4>주요 활용 케이스: 재무비율 계산을 위한 계정 그룹핑</h4>
+            <p>수익성, 안정성, 성장성 등 재무비율 계산에 필요한 계정들을 그룹화하여 조회</p>
+            <button class="query-button">쿼리 보기</button>
+        </div>
+    </section>
+
+    <!-- 종목 정보 테이블 섹션 -->
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="table-title">종목코드 설명 테이블 (stock_info)</h2>
+        </div>
+        
+        <div class="tag-container">
+            <span class="tag">주식</span>
+            <span class="tag">종목정보</span>
+            <span class="tag">상장정보</span>
+        </div>
+
+        <p class="description">주식 종목의 기본 정보를 관리하는 마스터 테이블</p>
+
+        <table class="metadata-table">
+            <tr>
+                <th>컬럼명</th>
+                <th>설명</th>
+                <th>데이터타입</th>
+                <th>제약조건</th>
+                <th>활용 태그</th>
+            </tr>
+            <tr>
+                <td>stock_code</td>
+                <td>종목 코드</td>
+                <td>VARCHAR(20)</td>
+                <td>Primary Key</td>
+                <td>종목식별, 조인키</td>
+            </tr>
+            <tr>
+                <td>stock_name</td>
+                <td>종목명</td>
+                <td>VARCHAR(100)</td>
+                <td>NOT NULL</td>
+                <td>종목검색, 표시</td>
+            </tr>
+            <tr>
+                <td>listing_date</td>
+                <td>상장일</td>
+                <td>DATE</td>
+                <td>NOT NULL</td>
+                <td>상장이력, 필터링</td>
+            </tr>
+            <tr>
+                <td>delisting_date</td>
+                <td>상장폐지일</td>
+                <td>DATE</td>
+                <td>NULL 허용</td>
+                <td>상장상태, 필터링</td>
+            </tr>
+        </table>
+
+        <div class="use-case">
+            <h4>주요 활용 케이스: 상장 주식 유니버스 생성</h4>
+            <p>분석 대상 종목 필터링 (상장된 종목 중 휴장/폐지 제외)</p>
+            <button class="query-button">쿼리 보기</button>
+        </div>
+    </section>
+
+    <!-- 재무제표 데이터 테이블 섹션 -->
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="table-title">재무제표 계정 값 테이블 (financial_statement)</h2>
+        </div>
+        
+        <div class="tag-container">
+            <span class="tag">재무제표</span>
+            <span class="tag">실적데이터</span>
+            <span class="tag">공시정보</span>
+        </div>
+
+        <p class="description">기업별 재무제표 데이터를 저장하는 실적 정보 테이블</p>
+
+        <table class="metadata-table">
+            <tr>
+                <th>컬럼명</th>
+                <th>설명</th>
+                <th>데이터타입</th>
+                <th>제약조건</th>
+                <th>활용 태그</th>
+            </tr>
+            <tr>
+                <td>stock_code</td>
+                <td>종목 코드</td>
+                <td>VARCHAR(20)</td>
+                <td>Foreign Key</td>
+                <td>종목식별, 조인키</td>
+            </tr>
+            <tr>
+                <td>account_code</td>
+                <td>계정과목 코드</td>
+                <td>VARCHAR(20)</td>
+                <td>Foreign Key</td>
+                <td>계정식별, 조인키</td>
+            </tr>
+            <tr>
+                <td>account_value</td>
+                <td>계정과목 값</td>
+                <td>DECIMAL(20,2)</td>
+                <td>NOT NULL</td>
+                <td>재무분석, 계산</td>
+            </tr>
+            <tr>
+                <td>quarter</td>
+                <td>분기</td>
+                <td>VARCHAR(6)</td>
+                <td>NOT NULL</td>
+                <td>기간분석, 필터링</td>
+            </tr>
+            <tr>
+                <td>release_dt</td>
+                <td>공시일자</td>
+                <td>TIMESTAMP</td>
+                <td>NOT NULL</td>
+                <td>시점분석, 정렬</td>
+            </tr>
+        </table>
+
+        <div class="use-case">
+            <h4>주요 활용 케이스: 분기별 실적 성장률 분석</h4>
+            <p>전년 동기 대비 매출/영업이익 성장률 계산</p>
+            <button class="query-button">쿼리 보기</button>
+        </div>
+    </section>
+
+    <!-- 주가 데이터 테이블 섹션 -->
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="table-title">종목별 가격 테이블 (stock_price)</h2>
+        </div>
+        
+        <div class="tag-container">
+            <span class="tag">주가</span>
+            <span class="tag">거래정보</span>
+            <span class="tag">시장데이터</span>
+        </div>
+
+        <p class="description">일별 주가 정보를 저장하는 시계열 데이터 테이블</p>
+
+        <table class="metadata-table">
+            <tr>
+                <th>컬럼명</th>
+                <th>설명</th>
+                <th>데이터타입</th>
+                <th>제약조건</th>
+                <th>활용 태그</th>
+            </tr>
+            <tr>
+                <td>stock_code</td>
+                <td>종목 코드</td>
+                <td>VARCHAR(20)</td>
+                <td>Foreign Key</td>
+                <td>종목식별, 조인키</td>
+            </tr>
+            <tr>
+                <td>open_price</td>
+                <td>시가</td>
+                <td>DECIMAL(10,2)</td>
+                <td>NOT NULL</td>
+                <td>가격분석, 차트</td>
+            </tr>
+            <tr>
+                <td>high_price</td>
+                <td>고가</td>
+                <td>DECIMAL(10,2)</td>
+                <td>NOT NULL</td>
+                <td>가격분석, 차트</td>
+            </tr>
+            <tr>
+                <td>low_price</td>
+                <td>저가</td>
+                <td>DECIMAL(10,2)</td>
+                <td>NOT NULL</td>
+                <td>가격분석, 차트</td>
+            </tr>
+            <tr>
+                <td>close_price</td>
+                <td>종가</td>
+                <td>DECIMAL(10,2)</td>
+                <td>NOT NULL</td>
+                <td>가격분석, 차트</td>
+            </tr>
+            <tr>
+                <td>volume</td>
+                <td>거래량</td>
+                <td>BIGINT</td>
+                <td>NOT NULL</td>
+                <td>거래분석, 차트</td>
+            </tr>
+            <tr>
+                <td>trd_dt</td>
+                <td>거래일자</td>
+                <td>DATE</td>
+                <td>NOT NULL</td>
+                <td>시점분석, 정렬</td>
+            </tr>
+        </table>
+
+        <div class="use-case">
+            <h4>주요 활용 케이스: 기술적 분석 지표 계산</h4>
+            <p>20일/60일 이동평균선 및 거래량 가중 평균가격(VWAP) 계산</p>
+            <button class="query-button">쿼리 보기</button>
+        </div>
+    </section>
+</body>
+</html>

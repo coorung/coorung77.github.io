@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB Auto-Documentation Project</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: #333;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 2rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+        
+        .project-structure {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .module-spec {
+            margin-bottom: 2rem;
+        }
+        
+        .implementation-steps li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .libraries {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <h1>DB Auto-Documentation Project</h1>
+
+    <h2>1. 프로젝트 구조</h2>
+    <pre class="project-structure">
+db_auto_doc/
+├── main.py
+├── config/
+│   ├── __init__.py
+│   ├── config.yaml        # DB 연결 정보, OpenAI API 키 등
+│   └── logging_config.py
+├── modules/
+│   ├── __init__.py
+│   ├── query_analyzer.py  # Query Log 분석 모듈
+│   ├── relationship_builder.py  # DB 관계 분석 모듈
+│   ├── metadata_tagger.py  # 메타데이터 태깅 모듈
+│   └── doc_generator.py   # 문서 생성 모듈
+├── utils/
+│   ├── __init__.py
+│   ├── db_connector.py    # DB 연결 유틸리티
+│   ├── llm_client.py      # LLM API 클라이언트
+│   └── sql_parser.py      # SQL 파싱 유틸리티
+├── templates/
+│   └── documentation.html  # Jinja2 템플릿
+└── tests/
+    ├── __init__.py
+    └── test_*.py          # 각 모듈별 테스트</pre>
+
+    <h2>2. 모듈별 상세 스펙</h2>
+
+    <div class="module-spec">
+        <h3>2.1 Query Analyzer (query_analyzer.py)</h3>
+        <pre><code>class QueryAnalyzer:
+    def __init__(self, db_connector, llm_client):
+        self.db_connector = db_connector
+        self.llm_client = llm_client
+        
+    def analyze_query_logs(self, days_back=30):
+        """Query 로그 분석"""
+        return {
+            'table_usage': {
+                'table_name': {
+                    'frequency': int,
+                    'common_joins': List[str],
+                    'common_conditions': List[str],
+                    'common_groupings': List[str]
+                }
+            },
+            'join_patterns': List[Dict],
+            'where_patterns': Dict,
+            'aggregation_patterns': Dict
+        }</code></pre>
+    </div>
+
+    <div class="module-spec">
+        <h3>2.2 Relationship Builder (relationship_builder.py)</h3>
+        <pre><code>class RelationshipBuilder:
+    def __init__(self, db_connector, llm_client):
+        self.db_connector = db_connector
+        self.llm_client = llm_client
+        
+    def build_relationships(self, query_analysis):
+        """관계 구조 생성"""
+        return {
+            'relationships': [{
+                'source_table': str,
+                'target_table': str,
+                'relationship_type': str,
+                'confidence_score': float,
+                'evidence': Dict
+            }],
+            'potential_relationships': List[Dict],
+            'erd_mermaid': str  # Mermaid 포맷 ERD
+        }</code></pre>
+    </div>
+
+    <div class="module-spec">
+        <h3>2.3 Metadata Tagger (metadata_tagger.py)</h3>
+        <pre><code>class MetadataTagger:
+    def __init__(self, llm_client):
+        self.llm_client = llm_client
+        
+    def generate_tags(self, table_name, query_analysis, relationships):
+        """메타데이터 태그 생성"""
+        return {
+            'domain_tags': List[str],
+            'metric_tags': {
+                'column_name': List[str]
+            },
+            'usage_tags': {
+                'column_name': List[str]
+            }
+        }</code></pre>
+    </div>
+
+    <div class="module-spec">
+        <h3>2.4 Documentation Generator (doc_generator.py)</h3>
+        <pre><code>class DocumentationGenerator:
+    def __init__(self, template_path):
+        self.template = self._load_template(template_path)
+        
+    def generate_documentation(self, 
+                             table_name,
+                             query_analysis,
+                             relationships,
+                             metadata_tags):
+        """HTML 문서 생성"""
+        return {
+            'html_content': str,
+            'table_info': Dict,
+            'usage_cases': List[Dict],
+            'related_tables': Dict
+        }</code></pre>
+    </div>
+
+    <h2>3. Main Application Flow (main.py)</h2>
+    <pre><code>from modules import *
+from utils import *
+
+class DBAutoDocumentation:
+    def __init__(self, config_path):
+        self.config = self._load_config(config_path)
+        self.db_connector = DBConnector(self.config['db'])
+        self.llm_client = LLMClient(self.config['llm'])
+        
+    def generate_documentation(self, table_names=None):
+        # 1. Query Log 분석
+        analyzer = QueryAnalyzer(self.db_connector, self.llm_client)
+        query_analysis = analyzer.analyze_query_logs()
+        
+        # 2. 관계 구조 생성
+        relationship_builder = RelationshipBuilder(
+            self.db_connector, 
+            self.llm_client
+        )
+        relationships = relationship_builder.build_relationships(
+            query_analysis
+        )
+        
+        # 3. 테이블별 문서 생성
+        docs = {}
+        for table in table_names or self.db_connector.get_all_tables():
+            # 태그 생성
+            tagger = MetadataTagger(self.llm_client)
+            tags = tagger.generate_tags(
+                table,
+                query_analysis,
+                relationships
+            )
+            
+            # 문서 생성
+            doc_generator = DocumentationGenerator('templates/documentation.html')
+            docs[table] = doc_generator.generate_documentation(
+                table,
+                query_analysis,
+                relationships,
+                tags
+            )
+            
+        return docs
+
+if __name__ == "__main__":
+    app = DBAutoDocumentation('config/config.yaml')
+    documentation = app.generate_documentation()
+    # Serve HTML...</code></pre>
+
+    <h2>4. 구현 순서</h2>
+    <ol class="implementation-steps">
+        <li>기본 프로젝트 구조 설정
+            <ul>
+                <li>디렉토리 구조 생성</li>
+                <li>의존성 설정 (requirements.txt)</li>
+                <li>설정 파일 템플릿 작성</li>
+            </ul>
+        </li>
+        <li>유틸리티 모듈 구현
+            <ul>
+                <li>DB 커넥터</li>
+                <li>LLM 클라이언트</li>
+                <li>SQL 파서</li>
+            </ul>
+        </li>
+        <li>핵심 모듈 구현
+            <ul>
+                <li>Query Analyzer</li>
+                <li>Relationship Builder</li>
+                <li>Metadata Tagger</li>
+                <li>Documentation Generator</li>
+            </ul>
+        </li>
+        <li>통합 및 테스트
+            <ul>
+                <li>단위 테스트 작성</li>
+                <li>통합 테스트 작성</li>
+                <li>예외 처리 추가</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>5. 필요한 라이브러리</h2>
+    <pre class="libraries">requirements.txt:
+
+sqlparse==0.4.4
+openai==1.3.0
+jinja2==3.1.2
+pyyaml==6.0.1
+psycopg2-binary==2.9.9  # PostgreSQL 용
+pymysql==1.1.0  # MySQL 용
+pytest==7.4.3
+python-dotenv==1.0.0</pre>
+
+    <h2>6. LLM 프롬프트 설계</h2>
+    <pre><code>QUERY_ANALYSIS_PROMPT = """
+Given the following SQL query patterns:
+{query_patterns}
+
+Please analyze and provide:
+1. Common table relationships
+2. Frequent join conditions
+3. Common filtering patterns
+4. Typical aggregation patterns
+
+Output should be in the following JSON format:
+{format_example}
+"""
+
+RELATIONSHIP_ANALYSIS_PROMPT = """
+Given the following query analysis and existing schema:
+{query_analysis}
+{schema_info}
+
+Please identify table relationships with:
+1. Relationship type (1:1, 1:N, N:M)
+2. Confidence score
+3. Supporting evidence
+
+Output should be in the following JSON format:
+{format_example}
+"""
+
+# Similar prompts for other modules...</code></pre>
+
+    <h2>7. 에러 처리</h2>
+    <p>각 모듈은 다음과 같은 예외 처리를 포함:</p>
+    <ul>
+        <li>DBConnectionError</li>
+        <li>QueryParsingError</li>
+        <li>LLMAPIError</li>
+        <li>DocumentationGenerationError</li>
+    </ul>
+
+    <h2>8. 로깅</h2>
+    <pre><code># logging_config.py
+LOGGING_CONFIG = {
+    'version': 1,
+    'handlers': {
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'db_auto_doc.log',
+            'formatter': 'standard'
+        }
+    },
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        }
+    },
+    # ... 추가 설정
+}</code></pre>
+</body>
+</html>
